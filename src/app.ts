@@ -84,6 +84,7 @@ const app = new Elysia()
 
         return {
           message: "The username is already in the queue",
+          status: `/search/${username}/status`,
         };
       }
 
@@ -93,10 +94,11 @@ const app = new Elysia()
 
       const isInStore = await handler.db.isInStore(username);
       if (isInStore) {
-        handler.set.status = 409;
+        handler.set.status = 200;
 
         return {
           message: "The username is already in the store",
+          results: `/search/${username}`,
         };
       }
 
@@ -119,7 +121,7 @@ const app = new Elysia()
 
       return {
         message: "The username is being processed",
-        results: `/search/${username}/results`,
+        results: `/search/${username}`,
       };
     },
     {
@@ -172,7 +174,27 @@ const app = new Elysia()
                     },
                     results: {
                       type: "string",
-                      example: "/search/johndoe/results",
+                      example: "/search/johndoe",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          200: {
+            description: "Username already processed",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: {
+                      type: "string",
+                      example: "The username is already in the store",
+                    },
+                    results: {
+                      type: "string",
+                      example: "/search/johndoe",
                     },
                   },
                 },
@@ -189,6 +211,10 @@ const app = new Elysia()
                     message: {
                       type: "string",
                       example: "The username is already in the queue",
+                    },
+                    status: {
+                      type: "string",
+                      example: "/search/johndoe/status",
                     },
                   },
                 },
@@ -295,10 +321,11 @@ const app = new Elysia()
         return {
           message:
             "The username has been processed. You can now get the results",
-          results: `/search/${username}/results`,
+          results: `/search/${username}`,
         };
       }
 
+      handler.set.status = 404;
       return {
         message:
           "The username has not been processed yet. Please create a search request",
@@ -341,7 +368,7 @@ const app = new Elysia()
                       },
                       results: {
                         type: "string",
-                        example: "/search/johndoe/results",
+                        example: "/search/johndoe",
                       },
                     },
                   },
@@ -361,6 +388,23 @@ const app = new Elysia()
                     message: {
                       type: "string",
                       example: "The username is already in the queue",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          404: {
+            description: "Username not in queue or store",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: {
+                      type: "string",
+                      example:
+                        "The username has not been processed yet. Please create a search request",
                     },
                   },
                 },
