@@ -1,10 +1,10 @@
 import { swagger } from "@elysiajs/swagger";
 import { Elysia, t } from "elysia";
 
+import Queue from "~/lib/queue";
+import Sherlock from "~/lib/sherlock";
+import Store from "~/lib/store";
 import packageJson from "../package.json";
-import Queue from "./lib/queue";
-import Sherlock from "./lib/sherlock";
-import Store from "./lib/store";
 
 const SWAGGER_TAGS = {
   search: "Search",

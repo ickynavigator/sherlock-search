@@ -1,4 +1,4 @@
-import type { UserResult } from "../types";
+import type { UserResult } from "~/types";
 
 // TODO: use redis or some other database to store results
 class Store {
