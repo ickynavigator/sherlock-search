@@ -1,10 +1,11 @@
 import app from "~/app";
+import { env } from "~/env";
 
-const PORT = process.env.PORT ?? 3000;
-
-app.listen(PORT);
-
-// eslint-disable-next-line no-console
-console.debug(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
-);
+app
+  .onStart(() => {
+    // eslint-disable-next-line no-console
+    console.debug(
+      `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+    );
+  })
+  .listen(env.PORT);
