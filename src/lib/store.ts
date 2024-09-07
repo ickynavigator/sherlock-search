@@ -9,6 +9,10 @@ class Store {
     return `${this.USER_KEY}:${username}`;
   }
 
+  getUsername(key: string) {
+    return key.replace(`${this.USER_KEY}:`, "");
+  }
+
   private serialize(list: UserResult[]) {
     const stringified = JSON.stringify(list);
     return stringified;
@@ -44,7 +48,7 @@ class Store {
 
   async debug() {
     const keys = await this._client.keys("user:*");
-    return keys;
+    return keys.map((k) => this.getUsername(k));
   }
 }
 
