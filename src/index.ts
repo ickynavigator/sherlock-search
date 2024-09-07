@@ -17,7 +17,7 @@ app
     await ctx.decorator.db._client.connect();
 
     logger.debug(
-      `🦊 Elysia is running at ${ctx.server?.hostname}:${ctx.server?.port} at ${new Date().toISOString()}`,
+      `🦊 Elysia is running at ${ctx.server?.hostname}:${ctx.server?.port}}`,
     );
   })
   .onError((ctx) => {
