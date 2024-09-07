@@ -2,14 +2,10 @@ import { runCommand } from "~/lib/utils";
 import type { UserResult } from "~/types";
 
 class Sherlock {
-  FLAGS = ["--no-color"];
-
-  getFlags() {
-    return this.FLAGS;
-  }
+  FLAGS = [];
 
   async search(username: string) {
-    const r = await runCommand(["sherlock", ...this.getFlags(), username]);
+    const r = await runCommand(["sherlock", ...this.FLAGS, username]);
     const { output: res } = r;
 
     const cleanedRes: UserResult[] = res
