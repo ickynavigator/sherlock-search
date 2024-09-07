@@ -11,6 +11,10 @@ RUN bun install --production
 
 RUN bun run build
 
+ARG PORT=3000
+
+ENV PORT=$PORT
+
 CMD [ "bun", "run", "start" ]
 
-EXPOSE 3000
+EXPOSE $PORT
