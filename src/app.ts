@@ -73,7 +73,7 @@ const app = new Elysia()
   .post(
     "search/:username",
     async (handler) => {
-      const username = handler.params.username.trim();
+      const username = handler.params.username.trim().toLowerCase();
       const ignoreCache = handler.query.ignoreCache;
 
       const isInQueue = await handler.store.queue.isInQueue(username);
@@ -200,7 +200,7 @@ const app = new Elysia()
   .get(
     "search/:username",
     async (handler) => {
-      const username = handler.params.username.trim();
+      const username = handler.params.username.trim().toLowerCase();
       const user = await handler.db.getUser(username);
 
       if (user === undefined) {
@@ -274,7 +274,7 @@ const app = new Elysia()
   .get(
     "search/:username/status",
     async (handler) => {
-      const username = handler.params.username.trim();
+      const username = handler.params.username.trim().toLowerCase();
       const isInQueue = await handler.store.queue.isInQueue(username);
 
       if (isInQueue) {
