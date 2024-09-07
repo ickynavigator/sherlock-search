@@ -109,6 +109,8 @@ const app = new Elysia()
 
         await handler.db.addUser(username, search);
         await handler.store.queue.dequeue(username);
+
+        handler.log.debug(`Search for ${username} completed`);
       };
 
       try {
