@@ -1,5 +1,6 @@
 import { swagger } from "@elysiajs/swagger";
 import { Elysia, t } from "elysia";
+import { rateLimit } from "elysia-rate-limit";
 import { createClient } from "redis";
 
 import { env } from "~/env";
@@ -20,6 +21,7 @@ const app = new Elysia()
       autoLogging: true,
     }),
   )
+  .use(rateLimit())
   .use(
     swagger({
       path: "/",
