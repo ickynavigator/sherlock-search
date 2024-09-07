@@ -157,17 +157,22 @@ const app = new Elysia()
           },
         ],
         responses: {
-          200: {
+          202: {
             description: "User search results",
             content: {
               "application/json": {
                 schema: {
-                  type: "array",
-                  items: {
-                    $ref: "#/components/schemas/UserResult",
+                  type: "object",
+                  properties: {
+                    message: {
+                      type: "string",
+                      example: "The username is being processed",
+                    },
+                    results: {
+                      type: "string",
+                      example: "/search/johndoe/results",
+                    },
                   },
-                  description:
-                    "A list of all the search results gotten from the sherlock search",
                 },
               },
             },
