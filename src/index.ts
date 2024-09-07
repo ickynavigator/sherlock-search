@@ -1,29 +1,31 @@
 import app from "~/app";
 import { env } from "~/env";
+import logger from "~/lib/logger";
 
 app
   .onStart(async (ctx) => {
-    // eslint-disable-next-line no-console
-    ctx.decorator.db._client.on("error", console.error);
-
-    // eslint-disable-next-line no-console
-    ctx.decorator.db._client.on("connect", console.debug);
+    ctx.decorator.db._client.on("error", (err) => {
+      logger.error(
+        "🦊 Elysia has encountered an error with the database:",
+        err,
+      );
+    });
+    ctx.decorator.db._client.on("connect", () => {
+      logger.debug("🦊 Elysia connected to the database");
+    });
 
     await ctx.decorator.db._client.connect();
 
-    // eslint-disable-next-line no-console
-    console.debug(
+    logger.debug(
       `🦊 Elysia is running at ${ctx.server?.hostname}:${ctx.server?.port} at ${new Date().toISOString()}`,
     );
   })
   .onError((ctx) => {
-    // eslint-disable-next-line no-console
-    console.error("🦊 Elysia has encountered an error:", ctx);
+    logger.error("🦊 Elysia has encountered an error:", ctx);
   })
-  .onStop(async (handler) => {
-    await handler.decorator.db._client.disconnect();
+  .onStop(async (ctx) => {
+    await ctx.decorator.db._client.disconnect();
 
-    // eslint-disable-next-line no-console
-    console.debug("🦊 Elysia is stopping...");
+    logger.debug("🦊 Elysia is stopping...");
   })
   .listen(env.PORT);

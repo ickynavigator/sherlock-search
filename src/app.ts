@@ -3,6 +3,7 @@ import { Elysia, t } from "elysia";
 import { createClient } from "redis";
 
 import { env } from "~/env";
+import logger from "~/lib/logger";
 import Queue from "~/lib/queue";
 import Sherlock from "~/lib/sherlock";
 import Store from "~/lib/store";
@@ -14,6 +15,11 @@ const SWAGGER_TAGS = {
 };
 
 const app = new Elysia()
+  .use(
+    logger.into({
+      autoLogging: true,
+    }),
+  )
   .use(
     swagger({
       path: "/",
@@ -104,8 +110,7 @@ const app = new Elysia()
       try {
         job();
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
+        handler.log.error(e);
       }
 
       handler.set.status = 202;
