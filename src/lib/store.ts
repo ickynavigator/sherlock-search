@@ -1,28 +1,50 @@
+import { RedisClientType } from "redis";
+
 import type { UserResult } from "~/types";
 
-// TODO: use redis or some other database to store results
 class Store {
-  private users: Map<string, UserResult[]> = new Map();
+  USER_KEY = "user";
+
+  getKey(username: string) {
+    return `${this.USER_KEY}:${username}`;
+  }
+
+  private serialize(list: UserResult[]) {
+    const stringified = JSON.stringify(list);
+    return stringified;
+  }
+
+  private deserialize(list: string) {
+    // TODO: use a safer way to parse JSON
+    const parsed = JSON.parse(list) as UserResult[];
+    return parsed;
+  }
+
+  constructor(public _client: RedisClientType) {}
 
   async addUser(username: string, results: UserResult[]) {
-    this.users.set(username, results);
+    await this._client.set(this.getKey(username), this.serialize(results));
     return results;
   }
 
   async getUser(username: string) {
-    return this.users.get(username);
+    const result = await this._client.get(this.getKey(username));
+    return result ? this.deserialize(result) : undefined;
   }
 
   async deleteUser(username: string) {
-    return this.users.delete(username);
+    const result = await this._client.del(this.getKey(username));
+    return result === 1;
   }
 
   async isInStore(username: string) {
-    return this.users.has(username);
+    const result = await this._client.exists(this.getKey(username));
+    return result === 1;
   }
 
   async debug() {
-    return Array.from(this.users.keys());
+    const keys = await this._client.keys("user:*");
+    return keys;
   }
 }
 

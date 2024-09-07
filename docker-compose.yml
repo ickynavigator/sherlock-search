@@ -1,0 +1,19 @@
+services:
+  redis:
+    image: redis:latest
+    restart: always
+    ports: [6379:6379]
+    volumes:
+      - ./.redis-cache:/root/redis
+    env_file: .env
+    environment:
+      REDIS_DATABASES: 16
+
+  search:
+    build:
+      dockerfile: ./Dockerfile.dev
+    ports: ["3000:3000"]
+    volumes: ["./:/app"]
+    depends_on:
+      - redis
+    env_file: .env

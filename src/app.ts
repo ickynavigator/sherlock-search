@@ -1,6 +1,8 @@
 import { swagger } from "@elysiajs/swagger";
 import { Elysia, t } from "elysia";
+import { createClient } from "redis";
 
+import { env } from "~/env";
 import Queue from "~/lib/queue";
 import Sherlock from "~/lib/sherlock";
 import Store from "~/lib/store";
@@ -51,8 +53,16 @@ const app = new Elysia()
       },
     }),
   )
-  .state("store", new Store())
   .state("queue", new Queue())
+  .decorate(
+    "db",
+    new Store(
+      createClient({
+        password: env.REDISPASSWORD,
+        url: env.REDIS_URL,
+      }),
+    ),
+  )
   .decorate("sherlock", new Sherlock())
   .post(
     "search/:username",
@@ -70,10 +80,10 @@ const app = new Elysia()
       }
 
       if (ignoreCache) {
-        await handler.store.store.deleteUser(username);
+        await handler.db.deleteUser(username);
       }
 
-      const isInStore = await handler.store.store.isInStore(username);
+      const isInStore = await handler.db.isInStore(username);
       if (isInStore) {
         handler.set.status = 409;
 
@@ -87,7 +97,7 @@ const app = new Elysia()
 
         const search = await handler.sherlock.search(username);
 
-        await handler.store.store.addUser(username, search);
+        await handler.db.addUser(username, search);
         await handler.store.queue.dequeue(username);
       };
 
@@ -181,7 +191,7 @@ const app = new Elysia()
     "search/:username",
     async (handler) => {
       const username = handler.params.username.trim();
-      const user = await handler.store.store.getUser(username);
+      const user = await handler.db.getUser(username);
 
       if (user === undefined) {
         handler.set.status = 404;
@@ -265,7 +275,7 @@ const app = new Elysia()
         };
       }
 
-      const userInStore = await handler.store.store.isInStore(username);
+      const userInStore = await handler.db.isInStore(username);
 
       if (userInStore) {
         handler.set.status = 200;
@@ -352,7 +362,7 @@ const app = new Elysia()
   .get(
     "debug",
     async (handler) => {
-      const store = await handler.store.store.debug();
+      const store = await handler.db.debug();
       const queue = await handler.store.queue.debug();
 
       return { store, queue };
