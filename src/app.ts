@@ -91,7 +91,12 @@ const app = new Elysia()
         await handler.store.queue.dequeue(username);
       };
 
-      job();
+      try {
+        job();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
 
       handler.set.status = 202;
 
