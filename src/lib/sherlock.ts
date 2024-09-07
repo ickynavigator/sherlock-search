@@ -2,7 +2,7 @@ import { runCommand } from "~/lib/utils";
 import type { UserResult } from "~/types";
 
 class Sherlock {
-  FLAGS = ["--no-color", "--site Instagram"];
+  FLAGS = ["--no-color"];
 
   getFlags() {
     return this.FLAGS;
