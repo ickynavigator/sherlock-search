@@ -355,13 +355,7 @@ const app = new Elysia()
       const store = await handler.store.store.debug();
       const queue = await handler.store.queue.debug();
 
-      // eslint-disable-next-line no-console
-      console.debug(store, queue);
-
-      return {
-        store,
-        queue,
-      };
+      return { store, queue };
     },
     {
       detail: {
