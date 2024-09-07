@@ -1,9 +1,8 @@
-import Bun from "bun";
+import { readableStreamToText, spawn } from "bun";
 
 export const runCommand = async (command: string[]) => {
-  const process = Bun.spawn(command, { stdout: "pipe" });
-
-  const output = await new Response(process.stdout).text();
+  const process = spawn(command);
+  const output = await readableStreamToText(process.stdout);
 
   return {
     output,
