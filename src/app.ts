@@ -418,6 +418,75 @@ const app = new Elysia()
     },
   )
   .get(
+    "search/:username/stream",
+    async function* (ctx) {
+      const username = ctx.params.username.trim().toLowerCase();
+      const ignoreCache = ctx.query.ignoreCache;
+
+      if (ignoreCache) {
+        await ctx.db.deleteUser(username);
+      }
+
+      const user = await ctx.db.getUser(username);
+      let results = [];
+
+      if (user) {
+        results = user;
+        yield* user;
+      } else {
+        // TODO: also kill the job
+        const isInQueue = await ctx.store.queue.isInQueue(username);
+        if (isInQueue) await ctx.store.queue.dequeue(username);
+
+        await ctx.store.queue.enqueue(username);
+
+        const stream = ctx.sherlock.searchStream(username);
+
+        while (true) {
+          const { done, value } = await stream.next();
+
+          if (done) {
+            results = value;
+            break;
+          }
+
+          results.push(value);
+          yield value;
+        }
+
+        await ctx.db.addUser(username, results);
+        await ctx.store.queue.dequeue(username);
+      }
+
+      return results;
+    },
+    {
+      params: t.Object({
+        username: t.String(),
+      }),
+      query: t.Object({
+        ignoreCache: t.Boolean({ default: false }),
+      }),
+
+      detail: {
+        tags: [SWAGGER_TAGS.search],
+        parameters: [
+          {
+            in: "path",
+            name: "username",
+            required: true,
+            schema: {
+              type: "string",
+              example: "johndoe",
+            },
+
+            description: "The username to search for.",
+          },
+        ],
+      },
+    },
+  )
+  .get(
     "debug",
     async (handler) => {
       const store = await handler.db.debug();
