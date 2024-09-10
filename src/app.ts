@@ -1,3 +1,4 @@
+import staticPlugin from "@elysiajs/static";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
@@ -21,6 +22,7 @@ const app = new Elysia()
       autoLogging: true,
     }),
   )
+  .use(staticPlugin())
   .use(rateLimit())
   .use(
     swagger({
@@ -522,5 +524,6 @@ const app = new Elysia()
         },
       },
     },
-  );
+  )
+  .get("/favicon.ico", (handler) => handler.redirect("/public/favicon.ico"));
 export default app;
