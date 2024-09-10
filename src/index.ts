@@ -1,3 +1,5 @@
+import cors from "@elysiajs/cors";
+
 import app from "~/app";
 import { env } from "~/env";
 import logger from "~/lib/logger";
@@ -17,7 +19,7 @@ app
     await ctx.decorator.db._client.connect();
 
     logger.debug(
-      `🦊 Elysia is running at ${ctx.server?.hostname}:${ctx.server?.port}}`,
+      `🦊 Elysia is running at ${ctx.server?.hostname}:${ctx.server?.port}`,
     );
   })
   .onError((ctx) => {
@@ -28,4 +30,5 @@ app
 
     logger.debug("🦊 Elysia is stopping...");
   })
+  .use(cors())
   .listen(env.PORT);
