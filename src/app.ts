@@ -421,44 +421,39 @@ const app = new Elysia()
     "search/:username/stream",
     async function* (ctx) {
       const username = ctx.params.username.trim().toLowerCase();
-      const ignoreCache = ctx.query.ignoreCache;
 
-      if (ignoreCache) {
-        await ctx.db.deleteUser(username);
-      }
+      const ignoreCache = ctx.query.ignoreCache;
+      if (ignoreCache) await ctx.db.deleteUser(username);
 
       const user = await ctx.db.getUser(username);
+      if (user) yield user;
+
       let results = [];
 
-      if (user) {
-        results = user;
-        yield* user;
-      } else {
-        // TODO: also kill the job
-        const isInQueue = await ctx.store.queue.isInQueue(username);
-        if (isInQueue) await ctx.store.queue.dequeue(username);
+      // TODO: also kill the job
+      const isInQueue = await ctx.store.queue.isInQueue(username);
+      if (isInQueue) await ctx.store.queue.dequeue(username);
 
-        await ctx.store.queue.enqueue(username);
+      await ctx.store.queue.enqueue(username);
 
-        const stream = ctx.sherlock.searchStream(username);
+      const stream = ctx.sherlock.searchStream(username);
 
-        while (true) {
-          const { done, value } = await stream.next();
+      while (true) {
+        const { done, value } = await stream.next();
 
-          if (done) {
-            results = value;
-            break;
-          }
-
-          results.push(value);
-          yield value;
+        if (done) {
+          results = value;
+          break;
         }
 
-        await ctx.db.addUser(username, results);
-        await ctx.store.queue.dequeue(username);
+        results.push(value);
+        yield results;
       }
 
-      return results;
+      await ctx.db.addUser(username, results);
+      await ctx.store.queue.dequeue(username);
+
+      yield results;
     },
     {
       params: t.Object({
