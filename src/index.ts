@@ -7,28 +7,23 @@ import logger from "~/lib/logger";
 app
   .onStart(async (ctx) => {
     ctx.decorator.db._client.on("error", (err) => {
-      logger.error(
-        "🦊 Elysia has encountered an error with the database:",
-        err,
-      );
+      logger.error("DB: Encountered an error:", err);
     });
+
     ctx.decorator.db._client.on("connect", () => {
-      logger.debug("🦊 Elysia connected to the database");
+      logger.debug("DB: Connected to the database");
     });
 
     await ctx.decorator.db._client.connect();
 
-    logger.debug(
-      `🦊 Elysia is running at ${ctx.server?.hostname}:${ctx.server?.port}`,
-    );
+    logger.debug(`Running at ${ctx.server?.hostname}:${ctx.server?.port}`);
   })
   .onError((ctx) => {
-    logger.error("🦊 Elysia has encountered an error:", ctx);
+    logger.error("Encountered an error:", ctx.error);
   })
   .onStop(async (ctx) => {
     await ctx.decorator.db._client.disconnect();
-
-    logger.debug("🦊 Elysia is stopping...");
+    logger.debug("Gracefully stopping...");
   })
   .use(cors())
   .listen(env.PORT);
